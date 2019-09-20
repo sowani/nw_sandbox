@@ -1,0 +1,33 @@
+Service re-spawning mechanism
+=============================
+
+Before using these files, following steps should be completed.
+
+1. Edit all .service files to update "WorkingDirectory" and "ExecStart" paths.
+   These fields (which needs edit before final deployment) are marked with
+   "EDIT_" prefix in service file.
+2. Complete installation process.
+
+#### Manual installation
+
+```
+cp kevin_aiml.service /etc/systemd/system/
+cp kevin_db.service /etc/systemd/system/
+cp kevin_ota.service /etc/systemd/system/
+systemctl daemon-reload
+systemctl restart
+```
+
+Status of individual process can be verified as:
+```
+systemctl status [service_name]
+```
+
+#### Scripted installation
+
+Assuming all modifications are done in service files, execute following
+script as root user from the same directory where service files are available:
+
+```
+run.sh
+```

@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+# Run following command to add this script to init:
+update-rc.d upstream-init defaults 97
+#
+# Date: 06.Dec.2018
+# Auth: Atul Sowani
+#
+
+# initialize CAN1 port.
+echo "setting up can0 ..."
+/usr/sbin/canconfig can0 bitrate 500000 ctrlmode triple-sampling on
+/usr/sbin/canconfig can0 start
+
+# Start OTA service and check if FW updates are available for Sec-Controller.
+# If updates are available, they are applied first. Starting other services
+# is deferred due to update.
+
+# Secondary FW is updated now. Launch other services now.
+
+# Launch DB service.
+
+# Launch KCG service.
+
+# Launch AI/ML service.

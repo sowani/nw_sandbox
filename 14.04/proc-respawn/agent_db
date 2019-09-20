@@ -1,0 +1,88 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:     db service
+# Default-Start:    2 3 4 5
+# Default-Stop:     0 1 6
+# Short-Description:    DB agent
+# Description:      DB agent
+#           for DB based storage.
+### END INIT INFO
+
+set -e
+
+DAEMON="/usr/sbin/db_agent"
+NAME="db_agent"
+PATH="/sbin:/bin:/usr/sbin:/usr/bin"
+LOGFILE="/var/log/kes/db_agent.log"
+CHROOT="/var/run/kes"
+PIDFILE="/var/run/kes/db.pid"
+
+test -x "${DAEMON}" || exit 0
+
+. /etc/init.d/functions
+
+if [ ! -d `dirname $LOGFILE` ]
+then
+  mkdir -p `dirname $LOGFILE`
+fi
+
+if [ ! -e "${LOGFILE}" ]
+then
+    touch "${LOGFILE}"
+    chmod 640 "${LOGFILE}"
+    chown root:adm "${LOGFILE}"
+fi
+
+if [ ! -d "${CHROOT}" ]
+then
+    mkdir -p "${CHROOT}"
+fi
+
+case "${1}" in
+    start)
+        echo -n "Starting DB service" "${NAME}"
+        start-stop-daemon -S -b -m -p $PIDFILE -x $DAEMON
+        n=0
+        while [ ${n} -le 5 ]
+        do
+            _PID="$(if [ -e ${PIDFILE} ]; then cat ${PIDFILE}; fi)"
+            if ! ps | grep -qs "{_PID}"
+            then
+                break
+            fi
+            sleep 1
+            n=$(( $n + 1 ))
+        done
+
+        if ! ps | grep -qs "${_PID}"
+        then
+            echo "DB agent failed."
+            exit 1
+        fi
+
+        echo " ... done."
+        ;;
+
+    stop)
+        echo "Stopping DB service" "${NAME}"
+        start-stop-daemon -K -p $PIDFILE -x $DAEMON
+        RET=$?
+        if [ $RET = 0 ]; then rm -f ${PIDFILE}; fi
+        echo $?
+        ;;
+
+    restart)
+        ${0} stop
+        ${0} start
+        ;;
+
+    status)
+        status $DAEMON
+        ;;
+
+    *)
+        echo "usage: ${0} {start|stop|restart|status}"
+        exit 1
+        ;;
+esac
